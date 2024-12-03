@@ -1,3 +1,5 @@
+module UsdxSongAssistant
+
 # USDX Song Assistant
 # 
 # USDX Song Assistant is a small julia script that 
@@ -7,18 +9,20 @@
 
 using Base.Filesystem
 using ArgParse
+using Logging
 
-function filter_filenames(filenames::Vector{String}, allowed_extensions::Vector{String})
-    # Convert all extensions to lowercase for case-insensitive comparison
+# Filter all filenames in the given vector for file extensions in the vector allowed_extensions.
+function filter_filenames(filenames::Vector{String}, allowed_extensions::Vector{String})::Vector{String}
+    # Convert all extensions to lowercase for case-insensitive comparison.
     lower_allowed_extensions = map(ext -> lowercase(ext), allowed_extensions)
     
     filtered_filenames = String[]
     
     for filename in filenames
-        # Extract the extension from the filename
+        # Extract the extension from the filename.
         ext = splitext(filename)[2]
         
-        # Check if the extension exists and is in the allowed list (case-insensitive)
+        # Check if the extension exists and is in the allowed list (case-insensitive).
         if ext != "" && any(lowercase(ext) == lowercase(ext_allowed) for ext_allowed in lower_allowed_extensions)
             push!(filtered_filenames, filename)
         end
@@ -26,19 +30,21 @@ function filter_filenames(filenames::Vector{String}, allowed_extensions::Vector{
     return filtered_filenames
 end
 
+# Read the given text file, search for specific lines and
+# replace the contents of these lines.
 function update_text_file(txt_file::String)
 	if !isfile(txt_file)
 		return
 	end
 	
-	# Open the input file
+	# Open the input file.
 	lines = readlines(txt_file)
 
 	# Define the patterns for lines starting with "#VIDEO:" and "#MP3:"
 	video_pattern = Regex("^#VIDEO:")
 	mp3_pattern = Regex("^#MP3:")
 
-	# Modify the lines
+	# Modify the lines.
 	modified_lines = []
 	for line in lines
 		if occursin(video_pattern, line)
@@ -50,32 +56,34 @@ function update_text_file(txt_file::String)
 		end
 	end
 
-	# Open the output file
+	# Open the output file and write the (modified) lines back to the file.
 	open(txt_file, "w") do output
-		# Write the modified lines back to the file
 		foreach(line -> println(output, line), modified_lines)
 	end
 end
 
-# Function to convert video to mp3 using ffmpeg
-function convert_video_to_mp3(input_file)
-    # Get the path 
+# Convert video to mp3 using ffmpeg.
+function convert_video_to_mp3(input_file::String)::String
+    # Get the path.
     dir_name = dirname(input_file)
     
-    # Construct output filename
+    # Construct output filename.
     output_file = joinpath(dir_name, "audio.mp3")
     
-    # Run ffmpeg command
+    # Run ffmpeg command.
     run(`ffmpeg -i $input_file -vn -acodec libmp3lame -b:a 192k $output_file -hide_banner -loglevel error`)
     
     return output_file
 end
 
+# Iterate though all subdirectories, find all video, audio and text files
+# Link audio and video files to text file.
 function process_subdirectories(directory::String)
     subdirs = readdir(directory)
     for subdir in subdirs
 		relsubdir = joinpath(directory, subdir)
         if isdir(relsubdir)
+            @info ("Processing directory: $subdir")
             files = readdir(relsubdir)
             # Filter for video files
             video_files = filter_filenames(files, [".mp4", ".mkv", ".flv"])
@@ -87,9 +95,9 @@ function process_subdirectories(directory::String)
 				try
 					input_file = joinpath(relsubdir, video_files[1])
 					output_file = convert_video_to_mp3(input_file)
-					println("Extracted audio from $input_file to $output_file")
+					@debug ("Extracted audio from $input_file to $output_file")
 				catch e
-					println("Error processing $input_file: $(e.message)")
+					@warn ("Error processing $input_file: $(e.message)")
 				end
             elseif length(audio_files) == 1
                 audio_file = audio_files[1]
@@ -102,7 +110,6 @@ function process_subdirectories(directory::String)
                 video_file = video_files[1]
                 new_name = joinpath(relsubdir, "video" * splitext(video_file)[2])
                 rename(joinpath(relsubdir, video_file), new_name)
-                # println("Renamed $(joinpath(relsubdir, video_file)) to $new_name")
 			end
 
 			if length(text_files) == 1
@@ -112,7 +119,7 @@ function process_subdirectories(directory::String)
     end
 end
 
-# Parse command-line arguments
+# Parse command-line arguments.
 function parse_commandline()
     s = ArgParseSettings(
         description = "Rename video and audio file, reference files in txt file.",
@@ -126,12 +133,14 @@ function parse_commandline()
             default = "."
     end
 
-    return parse_args(s)
+    return parse_args(ARGS, s)
 end
 
-# Main function
-function main()
+# Main entry point as required by PackageCompiler.
+function julia_main()::Cint
     parsed_args = parse_commandline()
+
+    global_logger(ConsoleLogger(stdout, Logging.Info))
 
     if haskey(parsed_args, "directory")
         directory = parsed_args["directory"]
@@ -140,7 +149,12 @@ function main()
         println("No directory specified. Using current directory.")
         process_subdirectories(".")
     end
-end
+    return 0
+  end
 
-# Call the main function
-main()
+
+
+end #  module UsdxSongAssistant
+
+# Call the main function of the UsdxSongAssistant module.
+UsdxSongAssistant.julia_main()

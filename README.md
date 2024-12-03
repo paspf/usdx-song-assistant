@@ -26,7 +26,7 @@ Depending on the source of your song files, the first three steps are not necess
 6. Repeat steps for all new songs
 7. Run the script to link video files with the songs text file, as well as generating MP3 files
 
-```
+```bash
 julia src/usdx-song-assistant.jl -d <PATH TO YOUR NEW SONGS DIRECTORY>
 ```
 
@@ -58,3 +58,11 @@ After running USDX Song Assistant the directories look like this:
 ```
 
 When always using USDX Song Assistant the script can be run on the full songs directory within UltraStar Deluxe.
+
+## Compiling package to executable
+
+This repository also contains a script to compile the package into an executable using PackageCompiler. Since compiled Julia packages are currently very large, this option should only be used if necessary.
+
+```bash
+julia compile-package.jl
+```
