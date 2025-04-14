@@ -2,6 +2,8 @@
 
 USDX Song Assistant is a small julia script that assists when adding songs to [UltraStar Deluxe](https://github.com/UltraStar-Deluxe/USDX). It parses a songs text file and analyzes the songs directory. 
 
+USDX Song Assistand performs the following operations:
+
  - The video file is renamed to `video.mp4` and linked to the songs text file (no manual editing of the text file required)
  - If the songs directory only contains a video file, and no MP3 file, the audio is extracted out of the video file, and linked to the songs text file.
  - If existent, the audio file is renamed to `audio.mp3` and linked to the songs text file
@@ -34,10 +36,10 @@ julia src/usdx-song-assistant.jl -d <PATH TO YOUR NEW SONGS DIRECTORY>
 
 ```
 - NewSongDir/ <- Song root directory, pass this directory to USDX Assistant
-    - Artist_1-Song_1 <- Can by any directory name
+    - Artist_1-Song_1 <- Can be any directory name
         - *.txt <- the songs text file, USDX searches for a *txt files
         - *.mp4 <- downloaded video, mkv containers are also supported
-    - Artist_2-Song_2 <- Can by any directory name
+    - Artist_2-Song_2 <- Can be any directory name
         - *.txt <- the songs text file, USDX searches for a *txt files
         - *.mp4 <- downloaded video, mkv containers are also supported
     ...
@@ -46,11 +48,11 @@ julia src/usdx-song-assistant.jl -d <PATH TO YOUR NEW SONGS DIRECTORY>
 After running USDX Song Assistant the directories look like this:
 ```
 - NewSongDir/ <- Song root directory, pass this directory to USDX Assistant
-    - Artist_1-Song_1 <- Can by any directory name
+    - Artist_1-Song_1 <- Can be any directory name
         - *.txt <- Edited text file
         - *.mp4 <- Renamed video
         - audio.mp3 <- Extracted audio
-    - Artist_2-Song_2 <- Can by any directory name
+    - Artist_2-Song_2 <- Can be any directory name
         - *.txt <- Edited text file
         - video.mp4 <- Renamed video
         - audio.mp3 <- Extracted audio
