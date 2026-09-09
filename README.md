@@ -49,10 +49,8 @@ Since most USDX song providers offer `.zip` files containing a `.txt` file and a
 - NewSongDir/ <- Song database root directory, pass this directory to USDX Assistant
     - Artist_1-Song_1 <- Can be any directory name
         - *.txt <- the songs text file, USDX searches for a *txt files
-        - *.mp4 <- downloaded video, mkv containers are also supported
     - Artist_2-Song_2 <- Can be any directory name
         - *.txt <- the songs text file, USDX searches for a *txt files
-        - *.mp4 <- downloaded video, mkv containers are also supported
     ...
 ```
 
